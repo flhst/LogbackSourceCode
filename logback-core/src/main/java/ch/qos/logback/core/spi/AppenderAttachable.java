@@ -22,41 +22,49 @@ import ch.qos.logback.core.Appender;
  * 
  * @author Ceki G&uuml;lc&uuml;
  */
+// 用于将appenders附加到对象的接口。
 public interface AppenderAttachable<E> {
     /**
      * Add an appender.
      */
+    // 添加一个Appender
     void addAppender(Appender<E> newAppender);
 
     /**
      * Get an iterator for appenders contained in the parent object.
      */
+    // 获取Appender的迭代器
     Iterator<Appender<E>> iteratorForAppenders();
 
     /**
      * Get an appender by name.
      */
+    // 根据name获取Appender
     Appender<E> getAppender(String name);
 
     /**
      * Returns <code>true</code> if the specified appender is in list of
      * attached attached, <code>false</code> otherwise.
      */
+    // Appender是否在当前对象中存在
     boolean isAttached(Appender<E> appender);
 
     /**
      * Detach and processPriorToRemoval all previously added appenders.
      */
+    // 分离和processPriorToRemoval所有以前添加的追加程序。
     void detachAndStopAllAppenders();
 
     /**
      * Detach the appender passed as parameter from the list of appenders.
      */
+    // 分离指定的Appender
     boolean detachAppender(Appender<E> appender);
 
     /**
      * Detach the appender with the name passed as parameter from the list of
      * appenders.
      */
+    // 按name分离某个Appender
     boolean detachAppender(String name);
 }

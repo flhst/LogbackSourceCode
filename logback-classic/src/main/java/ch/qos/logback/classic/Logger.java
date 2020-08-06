@@ -45,6 +45,7 @@ public final class Logger implements org.slf4j.Logger, LocationAwareLogger, Appe
 
     /**
      * The name of this logger
+     * （logger的名称）
      */
     private String name;
 
@@ -87,6 +88,14 @@ public final class Logger implements org.slf4j.Logger, LocationAwareLogger, Appe
      * 4) AppenderAttachableImpl is thread safe
      */
     transient private AppenderAttachableImpl<ILoggingEvent> aai;
+
+    /**
+     * 可加性，默认情况下设置为true，即默认情况下子代继承其祖先的追加器。
+     * 如果将此变量设置为false，那么将不使用位于此记录器祖先的附加程序。
+     * 但是，此记录器的子代将继承其附加器，除非子代也将其可加性标志也设置为false。
+     * 有关更多详细信息，请参见用户手册。
+     */
+    // 通过这个标志来阻断对父Logger中Appender的调用
     /**
      * Additivity is set to true by default, that is children inherit the
      * appenders of their ancestors by default. If this variable is set to
@@ -251,10 +260,12 @@ public final class Logger implements org.slf4j.Logger, LocationAwareLogger, Appe
      * @param event
      *          The event to log
      */
+    // 调用这个类的所有Appenders，根据additive来决定是否调用父Logger的Appenders
     public void callAppenders(ILoggingEvent event) {
         int writes = 0;
         for (Logger l = this; l != null; l = l.parent) {
             writes += l.appendLoopOnAppenders(event);
+            // additive默认true
             if (!l.additive) {
                 break;
             }
@@ -365,6 +376,9 @@ public final class Logger implements org.slf4j.Logger, LocationAwareLogger, Appe
      * The next methods are not merged into one because of the time we gain by not
      * creating a new Object[] with the params. This reduces the cost of not
      * logging by about 20 nanoseconds.
+     *
+     * （译：由于我们不使用参数创建新的Object[]会节省时间，
+     *      因此下一个方法不会合并为一个。这将不进行记录的成本降低了约20纳秒。）
      */
 
     private void filterAndLog_0_Or3Plus(final String localFQCN, final Marker marker, final Level level, final String msg, final Object[] params,
@@ -373,7 +387,9 @@ public final class Logger implements org.slf4j.Logger, LocationAwareLogger, Appe
         final FilterReply decision = loggerContext.getTurboFilterChainDecision_0_3OrMore(marker, this, level, msg, params, t);
 
         if (decision == FilterReply.NEUTRAL) {
+            // 一般来说，effectiveLevelInt来自ROOT，基本是INFO
             if (effectiveLevelInt > level.levelInt) {
+                // 即小于INFO级别的，都会过滤掉，比如debug日志。
                 return;
             }
         } else if (decision == FilterReply.DENY) {

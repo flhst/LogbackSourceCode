@@ -226,8 +226,9 @@ public class RollingFileAppender<E> extends FileAppender<E> {
 
         // We need to synchronize on triggeringPolicy so that only one rollover
         // occurs at a time
-        synchronized (triggeringPolicy) {
-            if (triggeringPolicy.isTriggeringEvent(currentlyActiveFile, event)) {
+        synchronized (triggeringPolicy) {  // 锁住，防止并发滚动日志
+            if (triggeringPolicy.isTriggeringEvent(currentlyActiveFile, event)) {  // 判断是否需要滚动日志
+                // 滚动日志
                 rollover();
             }
         }

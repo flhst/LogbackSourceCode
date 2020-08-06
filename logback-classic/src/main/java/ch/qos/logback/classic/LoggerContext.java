@@ -42,6 +42,12 @@ import ch.qos.logback.core.status.StatusManager;
 import ch.qos.logback.core.status.WarnStatus;
 
 /**
+ * LoggerContext将许多经典的logback组件粘合在一起。
+ * 原则上，每个经典的logback组件实例都直接或间接附加到LoggerContext实例。
+ * 同样重要的是，LoggerContext实现ILoggerFactory作为Logger实例的制造源。
+ */
+
+/**
  * LoggerContext glues many of the logback-classic components together. In
  * principle, every logback-classic component instance is attached either
  * directly or indirectly to a LoggerContext instance. Just as importantly
@@ -60,6 +66,7 @@ public class LoggerContext extends ContextBase implements ILoggerFactory, LifeCy
     private int noAppenderWarning = 0;
     final private List<LoggerContextListener> loggerContextListenerList = new ArrayList<LoggerContextListener>();
 
+    // <logger名称, Logger>
     private Map<String, Logger> loggerCache;
 
     private LoggerContextVO loggerContextRemoteView;
@@ -122,12 +129,14 @@ public class LoggerContext extends ContextBase implements ILoggerFactory, LifeCy
         // if we are asking for the root logger, then let us return it without
         // wasting time
         if (Logger.ROOT_LOGGER_NAME.equalsIgnoreCase(name)) {
+            // 如果name是root，直接返回
             return root;
         }
 
         int i = 0;
         Logger logger = root;
 
+        // 尝试从缓存中获取
         // check if the desired logger exists, if it does, return it
         // without further ado.
         Logger childLogger = (Logger) loggerCache.get(name);
@@ -139,6 +148,12 @@ public class LoggerContext extends ContextBase implements ILoggerFactory, LifeCy
         // if the desired logger does not exist, them create all the loggers
         // in between as well (if they don't already exist)
         String childName;
+        /**
+         * 这里getSeparatorIndexOf会处理.和$符号
+         * 假如说name为com.foo.bar，则最终出来的Logger层级为：
+         * ROOT -> com -> com.foo -> com.foo.bar
+         * 最终给出的是，最子的Logger，即com.foo.bar
+         */
         while (true) {
             int h = LoggerNameUtil.getSeparatorIndexOf(name, i);
             if (h == -1) {
@@ -149,9 +164,12 @@ public class LoggerContext extends ContextBase implements ILoggerFactory, LifeCy
             // move i left of the last point
             i = h + 1;
             synchronized (logger) {
+                // 遍历获取子logger
                 childLogger = logger.getChildByName(childName);
                 if (childLogger == null) {
+                    // 创建一个
                     childLogger = logger.createChildByName(childName);
+                    // 放到缓存中
                     loggerCache.put(childName, childLogger);
                     incSize();
                 }

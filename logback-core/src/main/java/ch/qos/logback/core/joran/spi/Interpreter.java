@@ -64,6 +64,7 @@ import ch.qos.logback.core.spi.ContextAwareImpl;
  * @author Ceki G&uuml;lc&uuml;
  * 
  */
+// 翻译员
 public class Interpreter {
     private static List<Action> EMPTY_LIST = new Vector<Action>(0);
 

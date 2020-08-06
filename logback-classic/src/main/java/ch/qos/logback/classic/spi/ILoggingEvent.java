@@ -21,6 +21,11 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.core.spi.DeferredProcessingAware;
 
 /**
+ * logback-classic的核心接口。
+ * 简而言之，logback-classic就是围绕此接口构建的处理链。
+ */
+
+/**
  * The central interface in logback-classic. In a nutshell, logback-classic is
  * nothing more than a processing chain built around this interface.
  * 

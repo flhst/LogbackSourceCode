@@ -67,6 +67,7 @@ public class AppenderAction<E> extends Action {
             HashMap<String, Appender<E>> appenderBag = (HashMap<String, Appender<E>>) ec.getObjectMap().get(ActionConst.APPENDER_BAG);
 
             // add the appender just created to the appender bag.
+            // 放到缓存中，等待AppenderRefAction的引用
             appenderBag.put(appenderName, appender);
 
             ec.pushObject(appender);

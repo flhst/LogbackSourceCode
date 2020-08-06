@@ -14,6 +14,13 @@
 package ch.qos.logback.core.spi;
 
 /**
+ * 此枚举表示logback中的filter组件可以返回的可能答复。
+ * ch.qos.logback.core.filter.Filter和ch.qos.logback.classic.turbo.TurboFilter抽象类的实现都使用它。
+ *
+ * 根据声明FilterReply值的顺序，FilterReply.ACCEPT.compareTo（FilterReply.DENY）将返回一个正值。
+ */
+
+/**
  *
  * This enum represents the possible replies that a filtering component
  * in logback can return. It is used by implementations of both 
@@ -27,5 +34,7 @@ package ch.qos.logback.core.spi;
  * @author S&eacute;bastien Pennec
  */
 public enum FilterReply {
-    DENY, NEUTRAL, ACCEPT;
+    DENY,   // 拒绝
+    NEUTRAL, // 中立
+    ACCEPT;  // 接收
 }

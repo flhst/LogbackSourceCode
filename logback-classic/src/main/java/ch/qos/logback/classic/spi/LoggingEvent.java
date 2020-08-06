@@ -30,6 +30,14 @@ import ch.qos.logback.classic.util.LogbackMDCAdapter;
 import org.slf4j.spi.MDCAdapter;
 
 /**
+ * 日志记录事件的内部表示。当做出肯定决定登录时，将创建LoggingEvent实例。该实例传递给不同的logback-classic组件。
+ *
+ * 诸如附加程序之类的logback-classic组件的编写者应注意，某些LoggingEvent字段是延迟初始化的。
+ * 因此，希望输出数据以供接收者以后正确读取的附加器必须在写入之前先初始化“惰性”字段。
+ * 有关确切列表，请参见prepareForDeferredProcessing()方法。
+ */
+
+/**
  * The internal representation of logging events. When an affirmative decision
  * is made to log then a <code>LoggingEvent</code> instance is created. This
  * instance is passed around to the different logback-classic components.
