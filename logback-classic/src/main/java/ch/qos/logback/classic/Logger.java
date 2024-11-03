@@ -33,6 +33,16 @@ import ch.qos.logback.core.spi.AppenderAttachable;
 import ch.qos.logback.core.spi.AppenderAttachableImpl;
 import ch.qos.logback.core.spi.FilterReply;
 
+/**
+ * https://www.cnblogs.com/tc971121/p/12660709.html
+ *
+ *
+ * 日志记录器，控制要输出哪些日志记录欲绝，对日志信息进行级别限制，
+ * 该类是一个抽象类，它实现了SLF4J的Logger接口，并且还实现了AppenderAttachable接口，
+ * 该类提供了多种日志记录方法和状态检查方法。
+ *
+ *
+ */
 public final class Logger implements org.slf4j.Logger, LocationAwareLogger, AppenderAttachable<ILoggingEvent>, Serializable {
 
     private static final long serialVersionUID = 5454405123156820674L; // 8745934908040027998L;
@@ -50,21 +60,28 @@ public final class Logger implements org.slf4j.Logger, LocationAwareLogger, Appe
     private String name;
 
     // The assigned levelInt of this logger. Can be null.
+    // 该logger的等级，可以为空
     transient private Level level;
 
     // The effective levelInt is the assigned levelInt and if null, a levelInt is
     // inherited form a parent.
+    /**
+     * 生效的等级数，当logger的level被设置，则effectiveLevelInt=level.levelInt
+     * 当level为null时，则继承父logger的effectiveLevelInt
+     */
     transient private int effectiveLevelInt;
 
     /**
      * The parent of this category. All categories have at least one ancestor
      * which is the root category.
      */
+    // 父Logger
     transient private Logger parent;
 
     /**
      * The children of this logger. A logger may have zero or more children.
      */
+    // 子Logger数组
     transient private List<Logger> childrenList;
 
     /**
@@ -86,6 +103,11 @@ public final class Logger implements org.slf4j.Logger, LocationAwareLogger, Appe
      * 3) all the other methods check whether 'aai' is null
      * <p>
      * 4) AppenderAttachableImpl is thread safe
+     */
+    /**
+     * 可连接的输出终端
+     * Logger是委托这个类实现AppenderAttachable接口，
+     *也是委托这个类来调用Appender组件来实际记录日志，所以这个字段是最关键的
      */
     transient private AppenderAttachableImpl<ILoggingEvent> aai;
 
@@ -153,23 +175,31 @@ public final class Logger implements org.slf4j.Logger, LocationAwareLogger, Appe
         }
     }
 
+    /**
+     * 设置Logger的日志级别
+     */
     public synchronized void setLevel(Level newLevel) {
+        // 如果新日志级别与当前Logger的级别相同，则直接返回
         if (level == newLevel) {
             // nothing to do;
             return;
         }
+        // 如果新日志级别为null，并且当前Logger是rootLogger，则抛出异常
         if (newLevel == null && isRootLogger()) {
             throw new IllegalArgumentException("The level of the root logger cannot be set to null");
         }
-
+        // 更新日志级别
         level = newLevel;
+        // 如果新日志级别为null，则从父Logger中获取日志级别
+        // 否则使用新日志级别
         if (newLevel == null) {
             effectiveLevelInt = parent.effectiveLevelInt;
             newLevel = parent.getEffectiveLevel();
         } else {
             effectiveLevelInt = newLevel.levelInt;
         }
-
+        // 如果有子Logger，则遍历子Logger，通知它们父日志器的日志级别已经更改，
+        // 使子日志更新其日志级别
         if (childrenList != null) {
             int len = childrenList.size();
             for (int i = 0; i < len; i++) {
@@ -179,6 +209,7 @@ public final class Logger implements org.slf4j.Logger, LocationAwareLogger, Appe
             }
         }
         // inform listeners
+        // 通过LoggerContext通知所有监听器日志级别已经更改
         loggerContext.fireOnLevelChange(this, newLevel);
     }
 
@@ -187,6 +218,25 @@ public final class Logger implements org.slf4j.Logger, LocationAwareLogger, Appe
      * prent's levelInt changed.
      * 
      * @param newParentLevelInt
+     */
+
+    // 该方法由父记录器调用，递归修改子记录器的有效日志级别
+    // 如果一个给定的 logger 没有指定一个层级，那么它就会继承离它最近的一个祖先的层级。
+    /**
+     * 所以可以将该递归函数写为
+     *  先写该递归函数的终止条件
+     *  if (level != null){
+     *             return;
+     *         }
+     *  level为null时处理
+     *          effectiveLevelInt = newParentLevelInt;
+     *         if (childrenList != null) {
+     *             int len = childrenList.size();
+     *             for (int i = 0; i < len; i++) {
+     *                 Logger child = (Logger) childrenList.get(i);
+     *                 child.handleParentLevelChange(newParentLevelInt);
+     *             }
+     *         }
      */
     private synchronized void handleParentLevelChange(int newParentLevelInt) {
         // changes in the parent levelInt affect children only if their levelInt is

@@ -23,29 +23,24 @@ import org.slf4j.LoggerFactory;
 public class SelectionRule {
 
     public static void main(String[] args) {
-        // get a logger instance named "com.foo". Let us further assume that the
-        // logger is of type ch.qos.logback.classic.Logger so that we can
-        // set its level
-        ch.qos.logback.classic.Logger logger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("com.foo");
-        // set its Level to INFO. The setLevel() method requires a logback logger
+        // ch.qos.logback.classic.Logger 可以设置日志的级别
+        // 获取一个名为 "com.foo" 的 logger 实例
+        ch.qos.logback.classic.Logger logger =
+                (ch.qos.logback.classic.Logger)LoggerFactory.getLogger("com.foo");
+        // 设置 logger 的级别为 INFO
         logger.setLevel(Level.INFO);
 
-        Logger barlogger = LoggerFactory.getLogger("com.foo.Bar");
+        // 这条日志可以打印，因为 WARN >= INFO
+        logger.warn("警告信息");
+        // 这条日志不会打印，因为 DEBUG < INFO
+        logger.debug("调试信息");
 
-        // This request is enabled, because WARN >= INFO
-        logger.warn("Low fuel level.");
-
-        // This request is disabled, because DEBUG < INFO.
-        logger.debug("Starting search for nearest gas station.");
-
-        // The logger instance barlogger, named "com.foo.Bar",
-        // will inherit its level from the logger named
-        // "com.foo" Thus, the following request is enabled
-        // because INFO >= INFO.
-        barlogger.info("Located nearest gas station.");
-
-        // This request is disabled, because DEBUG < INFO.
-        barlogger.debug("Exiting gas station search");
+        // "com.foo.bar" 会继承 "com.foo" 的有效级别
+        Logger barLogger = LoggerFactory.getLogger("com.foo.bar");
+        // 这条日志会打印，因为 INFO >= INFO
+        barLogger.info("子级信息");
+        // 这条日志不会打印，因为 DEBUG < INFO
+        barLogger.debug("子级调试信息");
 
     }
 }

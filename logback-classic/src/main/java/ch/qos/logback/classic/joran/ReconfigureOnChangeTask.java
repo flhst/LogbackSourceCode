@@ -27,13 +27,22 @@ public class ReconfigureOnChangeTask extends ContextAwareBase implements Runnabl
     long birthdate = System.currentTimeMillis();
     List<ReconfigureOnChangeTaskListener> listeners;
     
-    
+    /**
+     * 添加一个监听器到任务的监听器列表中
+     */
     void addListener(ReconfigureOnChangeTaskListener listener) {
         if(listeners==null)
             listeners = new ArrayList<ReconfigureOnChangeTaskListener>();
         listeners.add(listener);
     }
-    
+
+    /**
+     * 功能
+     *  1、检查配置文件是否有变化
+     *  2、如果配置文件有变化，则重新配置
+     *  3、根据配置文件类型（XML或Groovy）调用相应的配置方法
+     *  4、处理配置文件解析错误并回退到安全配置
+     */
     @Override
     public void run() {
         fireEnteredRunMethod();
